@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Ketan's Insta Mock — Full Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fafafa; --card:#fff; --txt:#111; --muted:#666; --accent:#0095f6; --glass: rgba(255,255,255,0.6);
+  }
+  [data-theme="dark"]{
+    --bg:#0b0b0b; --card:#111214; --txt:#e8e8e8; --muted:#9aa0a6; --accent:#2d9cff; --glass: rgba(255,255,255,0.03);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter,system-ui,Arial; background:var(--bg); color:var(--txt); -webkit-font-smoothing:antialiased;
+  }
+
+  /* Center login */
+  .login-wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
+  .login-card{width:360px; background:var(--card); border:1px solid rgba(0,0,0,0.06); padding:28px; border-radius:14px; text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.06)}
+  .logo{width:170px; margin-bottom:16px; opacity:.95}
+  .field{width:100%; padding:10px 12px; margin:8px 0; border-radius:8px; border:1px solid #d9d9d9; background:transparent; color:var(--txt)}
+  .btn{width:100%; padding:10px; border-radius:8px; border:none; background:var(--accent); color:white; font-weight:600; cursor:pointer; margin-top:8px}
+  .subtle{color:var(--muted); font-size:13px; margin-top:10px}
+
+  /* App shell */
+  .app-shell{display:none; max-width:980px; margin:0 auto; padding-bottom:92px;}
+  .topbar{position:sticky; top:0; display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:linear-gradient(var(--glass),var(--glass)); backdrop-filter: blur(6px); border-bottom:1px solid rgba(0,0,0,0.04); z-index:40}
+  .brand{display:flex; align-items:center; gap:10px}
+  .brand h1{font-size:20px;margin:0}
+  .search-input{padding:8px 12px;border-radius:10px;border:1px solid #ddd; width:220px}
+  .top-actions{display:flex; gap:10px; align-items:center}
+  .icon-btn{background:transparent;border:0;padding:8px;border-radius:8px; cursor:pointer; font-size:18px}
+
+  /* main layout */
+  .layout{display:flex; gap:18px; padding:18px}
+  .left-col{width:640px}
+  .right-col{width:300px; display:flex; flex-direction:column; gap:12px}
+
+  /* stories */
+  .stories{display:flex; gap:12px; padding:12px; background:var(--card); border-radius:12px; overflow:auto}
+  .story-item{display:flex; flex-direction:column; align-items:center; gap:8px; width:80px; cursor:pointer; text-align:center}
+  .story-item img{width:68px;height:68px;border-radius:50%; border:3px solid #ffdc; object-fit:cover; box-shadow:0 4px 12px rgba(0,0,0,0.06)}
+
+  /* post card */
+  .post{background:var(--card); border-radius:12px; margin-top:18px; padding:12px; border:1px solid rgba(0,0,0,0.04)}
+  .post-head{display:flex; gap:12px; align-items:center}
+  .avatar{width:46px;height:46px;border-radius:50%; object-fit:cover}
+  .post-img{width:100%; border-radius:10px; margin-top:10px; max-height:520px; object-fit:cover}
+  .post-actions{display:flex; gap:12px; margin-top:10px}
+  .like-btn, .save-btn{cursor:pointer; font-size:18px}
+
+  /* bottom nav */
+  .bottom-nav{position:fixed; left:50%; transform:translateX(-50%); bottom:12px; width:640px; display:flex; justify-content:space-between; background:var(--card); border-radius:14px; padding:8px 12px; box-shadow:0 12px 30px rgba(0,0,0,0.12); align-items:center; z-index:60}
+  .nav-item{flex:1; text-align:center; cursor:pointer; font-weight:600;color:var(--muted)}
+
+  /* search, reels, profile pages */
+  .page{display:none}
+  .page.active{display:block}
+
+  /* reels */
+  .reels-wrap{height:78vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px}
+  .reel{width:360px; height:640px; border-radius:14px; overflow:hidden; background:black; display:flex; align-items:center; justify-content:center; position:relative}
+  .reel video{width:100%; height:100%; object-fit:cover}
+
+  /* profile grid */
+  .profile-header{display:flex; gap:18px; align-items:center; padding:12px; background:var(--card); border-radius:12px}
+  .profile-pic{width:110px;height:110px;border-radius:50%; object-fit:cover}
+  .stats{display:flex; gap:12px; margin-top:8px}
+  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:12px}
+  .grid img{width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:6px}
+
+  /* story viewer modal */
+  .story-modal{position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:100}
+  .story-content{width:95%; max-width:520px; background:transparent; border-radius:10px; text-align:center; color:white}
+  .story-img{width:100%; max-height:80vh; object-fit:contain; border-radius:10px}
+  .story-controls{display:flex; justify-content:space-between; margin-top:8px}
+
+  /* DM panel */
+  .dm-wrap{display:flex; gap:12px}
+  .dm-list{width:180px; background:var(--card); border-radius:10px; padding:8px; overflow:auto; max-height:60vh}
+  .dm-convo{flex:1; background:var(--card); border-radius:10px; padding:12px; display:flex; flex-direction:column; max-height:60vh}
+  .msg{padding:8px 10px; border-radius:12px; margin:6px 0; max-width:75%}
+  .msg.me{align-self:flex-end; background:var(--accent); color:white}
+  .msg.them{align-self:flex-start; background:rgba(0,0,0,0.03)}
+  .dm-input{display:flex; gap:8px; margin-top:8px}
+  .dm-input input{flex:1;padding:8px;border-radius:10px;border:1px solid #ddd}
+
+  /* notifications */
+  .notif-item{background:var(--card); padding:12px; border-radius:10px; margin-top:8px; border:1px solid rgba(0,0,0,0.03)}
+
+  /* animations */
+  .fade{transition:all .28s cubic-bezier(.2,.9,.3,1)}
+  .scale-up{transform:scale(1.02)}
+  .glow{box-shadow:0 10px 30px rgba(45,157,255,0.12)}
+
+  /* responsive tweaks */
+  @media(max-width:760px){
+    .left-col{width:100%}
+    .right-col{display:none}
+    .bottom-nav{width:96%}
+    .layout{padding:10px}
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card fade">
+    <img class="logo" src="https://i.imgur.com/zqpwkLQ.png" alt="logo">
+    <input class="field" placeholder="Phone, username or email" id="inpUser">
+    <input class="field" placeholder="Password" type="password" id="inpPass">
+    <button class="btn" id="loginBtn">Log In</button>
+    <div style="display:flex; gap:8px; margin-top:12px; align-items:center; justify-content:center">
+      <label style="font-size:13px;color:var(--muted)">Dark Mode</label>
+      <input type="checkbox" id="themeToggle" />
+    </div>
+    <div class="subtle">Demo only — no data is sent anywhere.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app-shell" id="appShell">
+
+  <div class="topbar">
+    <div class="brand">
+      <img src="https://i.imgur.com/zqpwkLQ.png" style="width:36px;height:36px;border-radius:6px">
+      <h1>ketan_dikhayega_rasta</h1>
+    </div>
+
+    <div class="top-actions">
+      <input id="globalSearch" class="search-input" placeholder="Search" />
+      <button class="icon-btn" id="msgIcon" title="Messages">💬</button>
+      <button class="icon-btn" id="notifIcon" title="Notifications">🔔</button>
+      <button class="icon-btn" id="themeBtn" title="Theme">🌓</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="left-col">
+
+      <!-- HOME PAGE -->
+      <div id="homePage" class="page active">
+        <div class="stories fade" id="storiesBar">
+          <!-- stories injected -->
+        </div>
+
+        <div id="feed">
+          <!-- posts injected -->
+        </div>
+      </div>
+
+      <!-- SEARCH PAGE -->
+      <div id="searchPage" class="page">
+        <h3>Search</h3>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <div style="width:48%; background:var(--card); padding:12px; border-radius:10px">Discover 1</div>
+          <div style="width:48%; background:var(--card); padding:12px; border-radius:10px">Discover 2</div>
+        </div>
+      </div>
+
+      <!-- REELS PAGE -->
+      <div id="reelsPage" class="page">
+        <div class="reels-wrap" id="reelsWrap">
+          <!-- reels injected -->
+        </div>
+      </div>
+
+      <!-- MESSAGES PAGE -->
+      <div id="messagesPage" class="page">
+        <h3>Messages</h3>
+        <div class="dm-wrap">
+          <div class="dm-list" id="dmList"></div>
+          <div class="dm-convo" id="dmConvo">
+            <div id="dmMessages" style="overflow:auto"></div>
+            <div class="dm-input">
+              <input id="dmText" placeholder="Message...">
+              <button class="btn" id="dmSend">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS PAGE -->
+      <div id="notificationsPage" class="page">
+        <h3>Notifications</h3>
+        <div id="notificationsList"></div>
+      </div>
+
+      <!-- PROFILE PAGE -->
+      <div id="profilePage" class="page">
+        <div class="profile-header">
+          <img class="profile-pic" src="https://i.imgur.com/IG7QbRk.jpeg" alt="profile">
+          <div>
+            <h2>_ketan_jindal</h2>
+            <div class="stats"><div><b>24</b><div style="font-size:13px;color:var(--muted)">Posts</div></div><div><b>1.2k</b><div style="font-size:13px;color:var(--muted)">Followers</div></div><div><b>320</b><div style="font-size:13px;color:var(--muted)">Following</div></div></div>
+            <div style="margin-top:10px">
+              <button class="btn" id="editProfileBtn" style="width:auto;padding:8px 12px">Edit Profile</button>
+              <button class="btn" id="dmOpenBtn" style="width:auto;padding:8px 12px;margin-left:8px;background:#777">Message</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <button class="btn" id="toggleGridBtn" style="width:120px;background:var(--card);color:var(--txt);border:1px solid #ddd">Toggle Grid</button>
+        </div>
+
+        <div class="grid" id="profileGrid"></div>
+      </div>
+
+    </div>
+
+    <div class="right-col">
+      <div style="position:sticky; top:80px">
+        <div style="background:var(--card); padding:12px; border-radius:10px">
+          <strong>Suggestions</strong>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-direction:column">
+            <div style="display:flex;align-items:center;gap:8px"><img src="https://i.imgur.com/j4sB9Fw.jpeg" style="width:36px;height:36px;border-radius:50%"><div><div style="font-weight:600">friend1</div><div style="font-size:12px;color:var(--muted)">New to Insta</div></div><button style="margin-left:auto" class="btn">Follow</button></div>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div style="background:var(--card); padding:12px; border-radius:10px">
+          <div style="font-size:13px;color:var(--muted)">About</div>
+          <div style="margin-top:8px">This is a safe demo created by Ketan. No real login.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- bottom nav -->
+  <div class="bottom-nav fade" id="bottomNav">
+    <div class="nav-item" onclick="navTo('home')">🏠 Home</div>
+    <div class="nav-item" onclick="navTo('search')">🔍 Search</div>
+    <div class="nav-item" onclick="navTo('reels')">🎬 Reels</div>
+    <div class="nav-item" onclick="navTo('messages')">✉️ Messages</div>
+    <div class="nav-item" onclick="navTo('notifications')">🔔 Notif</div>
+    <div class="nav-item" onclick="navTo('profile')">👤 Profile</div>
+  </div>
+
+</div>
+
+<!-- Story Modal -->
+<div class="story-modal" id="storyModal">
+  <div class="story-content">
+    <img id="storyImage" class="story-img" src="">
+    <div class="story-controls">
+      <button class="btn" id="prevStory">Prev</button>
+      <button class="btn" id="nextStory">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- Demo data ---------- */
+const STORIES = [
+  {id:1,user:'You',img:'https://i.imgur.com/IG7QbRk.jpeg'},
+  {id:2,user:'friend1',img:'https://i.imgur.com/tYdINgR.jpeg'},
+  {id:3,user:'friend2',img:'https://i.imgur.com/j4sB9Fw.jpeg'},
+  {id:4,user:'travel',img:'https://i.imgur.com/azQ9r2o.jpeg'}
+];
+
+const POSTS = [
+  {id:1,user:'_ketan_jindal',avatar:'https://i.imgur.com/IG7QbRk.jpeg',img:'https://i.imgur.com/IG7QbRk.jpeg',caption:'My first post 😎'},
+  {id:2,user:'mini_user',avatar:'https://i.imgur.com/j4sB9Fw.jpeg',img:'https://i.imgur.com/tYdINgR.jpeg',caption:'Sunset vibes 🌅'},
+  {id:3,user:'travel_guy',avatar:'https://i.imgur.com/IG7QbRk.jpeg',img:'https://i.imgur.com/azQ9r2o.jpeg',caption:'Mountains! 🏔️'},
+];
+
+const REELS = [
+  {id:1,src:'https://cdn.coverr.co/videos/coverr-mountain-sunrise-8244/1080p.mp4'},
+  {id:2,src:'https://cdn.coverr.co/videos/coverr-surfer-in-the-ocean-1576/1080p.mp4'},
+  {id:3,src:'https://cdn.coverr.co/videos/coverr-city-night-8463/1080p.mp4'}
+];
+
+const DMS = [
+  {id:1,user:'friend1',last:'Yo, where are you?', messages:[
+    {from:'them',text:'Hey!'},
+    {from:'me',text:'Hi! This demo is cool.'},
+    {from:'them',text:'Show me more.'}
+  ]},
+  {id:2,user:'friend2',last:'Nice...', messages:[
+    {from:'them',text:'Nice post bro.'}
+  ]}
+];
+
+const NOTIFS = [
+  {text:'friend1 liked your post', time:'2h'},
+  {text:'travel_guy started following you', time:'1d'},
+];
+
+/* ---------- UI Helpers and render ---------- */
+const storiesBar = document.getElementById('storiesBar');
+const feed = document.getElementById('feed');
+const reelsWrap = document.getElementById('reelsWrap');
+const profileGrid = document.getElementById('profileGrid');
+const dmList = document.getElementById('dmList');
+const dmMessages = document.getElementById('dmMessages');
+const notificationsList = document.getElementById('notificationsList');
+
+function createStories(){
+  STORIES.forEach((s, idx)=>{
+    const el = document.createElement('div');
+    el.className = 'story-item fade';
+    el.innerHTML = `<img src="${s.img}" data-idx="${idx}" alt="${s.user}"><div style="font-size:13px;color:var(--muted)">${s.user}</div>`;
+    el.onclick = ()=>openStory(idx);
+    storiesBar.appendChild(el);
+  });
+}
+
+function createFeed(){
+  POSTS.forEach(p=>{
+    const div = document.createElement('div'); div.className='post fade';
+    div.innerHTML = `
+      <div class="post-head"><img class="avatar" src="${p.avatar}"><div style="flex:1"><div style="font-weight:700">${p.user}</div><div style="font-size:13px;color:var(--muted)">Location</div></div><div style="font-size:20px">⋯</div></div>
+      <img class="post-img" src="${p.img}">
+      <div class="post-actions"><span class="like-btn">❤</span><span>💬</span><span>✈️</span><span style="margin-left:auto">🔖</span></div>
+      <div style="margin-top:8px"><strong>${p.user}</strong> ${p.caption}</div>
+    `;
+    feed.appendChild(div);
+  });
+}
+
+function createReels(){
+  REELS.forEach((r, idx)=>{
+    const el = document.createElement('div'); el.className='reel fade';
+    el.innerHTML = `<video src="${r.src}" playsinline loop muted></video>`;
+    el.dataset.idx = idx;
+    // clicking toggles mute
+    el.querySelector('video').onclick = e=>{
+      const v = e.target; v.muted = !v.muted;
+    };
+    reelsWrap.appendChild(el);
+  });
+  // start first reel playing
+  setTimeout(()=>{ playReelAt(0); }, 400);
+}
+
+function createProfileGrid(){
+  // create a bunch of images for grid sample
+  const imgs = [];
+  for(let i=0;i<12;i++){
+    imgs.push('https://picsum.photos/seed/kt'+i+'/500');
+  }
+  profileGrid.innerHTML = imgs.map(src=>`<img src="${src}">`).join('');
+}
+
+function createDMList(){
+  dmList.innerHTML = '';
+  DMS.forEach((d, idx)=>{
+    const el = document.createElement('div');
+    el.style.display='flex'; el.style.gap='8px'; el.style.alignItems='center'; el.style.padding='8px'; el.style.cursor='pointer';
+    el.innerHTML = `<img src="https://i.imgur.com/j4sB9Fw.jpeg" style="width:44px;height:44px;border-radius:50%"><div style="flex:1"><strong>${d.user}</strong><div style="font-size:13px;color:var(--muted)">${d.last}</div></div>`;
+    el.onclick = ()=>openDM(idx);
+    dmList.appendChild(el);
+  });
+}
+
+function renderNotifications(){
+  notificationsList.innerHTML = '';
+  NOTIFS.forEach(n=>{
+    const div = document.createElement('div');
+    div.className='notif-item fade';
+    div.innerHTML = `<div style="font-size:14px">${n.text}</div><div style="font-size:12px;color:var(--muted)">${n.time}</div>`;
+    notificationsList.appendChild(div);
+  });
+}
+
+/* ---------- Story viewer ---------- */
+let currentStory = 0;
+const storyModal = document.getElementById('storyModal');
+const storyImage = document.getElementById('storyImage');
+function openStory(idx){
+  currentStory = idx;
+  storyImage.src = STORIES[idx].img;
+  storyModal.style.display='flex';
+}
+document.getElementById('prevStory').onclick = ()=>{
+  currentStory = (currentStory-1+STORIES.length)%STORIES.length;
+  storyImage.src = STORIES[currentStory].img;
+};
+document.getElementById('nextStory').onclick = ()=>{
+  currentStory = (currentStory+1)%STORIES.length;
+  storyImage.src = STORIES[currentStory].img;
+};
+storyModal.onclick = (e)=>{ if(e.target===storyModal) storyModal.style.display='none'; };
+
+/* ---------- DM handling ---------- */
+let activeDm = 0;
+function openDM(idx){
+  activeDm = idx;
+  navTo('messages');
+  loadDmMessages();
+}
+function loadDmMessages(){
+  dmMessages.innerHTML = '';
+  const convo = DMS[activeDm].messages;
+  convo.forEach(m=>{
+    const d = document.createElement('div');
+    d.className = 'msg ' + (m.from==='me' ? 'me' : 'them');
+    d.textContent = m.text;
+    dmMessages.appendChild(d);
+  });
+  dmMessages.scrollTop = dmMessages.scrollHeight;
+}
+document.getElementById('dmSend').onclick = ()=>{
+  const txt = document.getElementById('dmText').value.trim();
+  if(!txt) return;
+  DMS[activeDm].messages.push({from:'me', text:txt});
+  document.getElementById('dmText').value='';
+  loadDmMessages();
+};
+
+/* ---------- nav and page switching ---------- */
+function hideAllPages(){
+  document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active'); p.style.display='none'});
+}
+function navTo(name){
+  // show app shell
+  document.getElementById('appShell').style.display='block';
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('bottomNav').style.display='flex';
+
+  hideAllPages();
+  if(name==='home'){
+    document.getElementById('homePage').classList.add('active'); document.getElementById('homePage').style.display='block';
+  } else if(name==='search'){
+    document.getElementById('searchPage').classList.add('active'); document.getElementById('searchPage').style.display='block';
+  } else if(name==='reels'){
+    document.getElementById('reelsPage').classList.add('active'); document.getElementById('reelsPage').style.display='block';
+  } else if(name==='messages'){
+    document.getElementById('messagesPage').classList.add('active'); document.getElementById('messagesPage').style.display='block';
+  } else if(name==='notifications'){
+    document.getElementById('notificationsPage').classList.add('active'); document.getElementById('notificationsPage').style.display='block';
+  } else if(name==='profile'){
+    document.getElementById('profilePage').classList.add('active'); document.getElementById('profilePage').style.display='block';
+  }
+}
+
+/* ---------- Reels behaviour (swipe/scroll) ---------- */
+let currentReel = 0;
+function playReelAt(idx){
+  const reels = document.querySelectorAll('.reel');
+  reels.forEach((r,i)=>{ const v=r.querySelector('video'); if(i===idx){ v.play(); r.classList.add('scale-up') } else { v.pause(); r.classList.remove('scale-up') }});
+  currentReel = idx;
+}
+function nextReel(){ currentReel = Math.min(currentReel+1, REELS.length-1); playReelAt(currentReel);}
+function prevReel(){ currentReel = Math.max(currentReel-1, 0); playReelAt(currentReel); }
+
+// Add wheel & touch support
+let startY = null;
+reelsWrap.addEventListener('wheel', (e)=>{
+  if(e.deltaY>30) nextReel(); else if(e.deltaY<-30) prevReel();
+});
+reelsWrap.addEventListener('touchstart',(e)=>{ startY = e.touches[0].clientY; });
+reelsWrap.addEventListener('touchend',(e)=>{
+  if(startY===null) return;
+  const endY = e.changedTouches[0].clientY;
+  if(startY - endY > 50) nextReel();
+  else if(endY - startY > 50) prevReel();
+  startY = null;
+});
+
+/* ---------- Theme toggle ---------- */
+const themeToggle = document.getElementById('themeToggle');
+const themeBtn = document.getElementById('themeBtn');
+function setTheme(dark){
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  localStorage.setItem('k_demo_theme', dark ? 'dark' : 'light');
+  themeToggle.checked = dark;
+}
+themeToggle.onchange = ()=> setTheme(themeToggle.checked);
+themeBtn.onclick = ()=> setTheme(document.documentElement.getAttribute('data-theme')!=='dark');
+
+/* ---------- Login action ---------- */
+document.getElementById('loginBtn').onclick = ()=>{
+  // demo of "login" → just open app
+  navTo('home');
+  // render dynamic parts
+  createStories(); createFeed(); createReels(); createProfileGrid(); createDMList(); renderNotifications();
+};
+
+/* top icons */
+document.getElementById('msgIcon').onclick = ()=> navTo('messages');
+document.getElementById('notifIcon').onclick = ()=> navTo('notifications');
+document.getElementById('dmOpenBtn').onclick = ()=> navTo('messages');
+
+/* profile toggle grid */
+document.getElementById('toggleGridBtn').onclick = ()=>{
+  profileGrid.classList.toggle('grid');
+  if(!profileGrid.classList.contains('grid')){
+    profileGrid.style.display = 'grid';
+    profileGrid.style.gridTemplateColumns = 'repeat(2,1fr)';
+  } else {
+    profileGrid.style.gridTemplateColumns = 'repeat(3,1fr)';
+  }
+};
+
+/* init theme from storage */
+(function init(){
+  const t = localStorage.getItem('k_demo_theme') || 'light';
+  setTheme(t==='dark');
+})();
+
+/* safety note - override any accidental form submits */
+document.querySelectorAll('form').forEach(f=>f.onsubmit=(e)=>e.preventDefault());
+
+/* accessibility: keyboard nav for story modal */
+document.addEventListener('keydown', (e)=>{
+  if(document.getElementById('storyModal').style.display==='flex'){
+    if(e.key==='ArrowRight') document.getElementById('nextStory').click();
+    if(e.key==='ArrowLeft') document.getElementById('prevStory').click();
+    if(e.key==='Escape') document.getElementById('storyModal').style.display='none';
+  }
+});
+
+/* small finishing touches */
+setTimeout(()=>{ document.querySelectorAll('.fade').forEach(el=>el.style.transition='all .28s cubic-bezier(.2,.9,.3,1)') },200);
+</script>
+
+</body>
+</html>
